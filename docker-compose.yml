@@ -1,0 +1,34 @@
+services:
+  # Serviço do Backend (nossa API)
+  backend:
+    build: ./back # Diz ao Compose para construir a imagem usando o Dockerfile na pasta 'backend'
+    container_name: meu-catalogo-backend
+    restart: always
+    ports:
+      - "5001:5001" # Mapeia a porta 5001 do contêiner para a porta 5001 da sua máquina
+    environment:
+      # Passa as variáveis de ambiente para o contêiner do backend
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - app-network
+
+  # Serviço do Frontend (nosso React App)
+  frontend:
+    build:
+      context: ./front # O contexto de construção continua a ser a pasta frontend
+      args:
+        # Passa a variável do .env da raiz como um argumento para o Dockerfile
+        - VITE_TMDB_API_KEY=${VITE_TMDB_API_KEY}
+    container_name: meu-catalogo-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
